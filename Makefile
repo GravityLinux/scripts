@@ -2,7 +2,7 @@ PREFIX=/usr/local
 SYS_PREFIX=$(PREFIX)
 CONFIG_DIR=/etc/default
 BIN_DIR=$(PREFIX)/bin
-SCRIPTS=asahi-diagnose asahi-fwupdate update-m1n1
+SCRIPTS=gravity-diagnose gravity-fwupdate update-m1n1
 ARCH_SCRIPTS=update-grub first-boot
 UNITS=first-boot.service
 MULTI_USER_WANTS=first-boot.service
@@ -28,25 +28,25 @@ install: all
 	install -d $(DESTDIR)$(BIN_DIR)/
 	install -m0755 -t $(DESTDIR)$(BIN_DIR)/ $(BUILD_SCRIPTS)
 	install -dD $(DESTDIR)/etc
-	install -dD $(DESTDIR)$(PREFIX)/share/asahi-scripts
-	install -m0644 -t $(DESTDIR)$(PREFIX)/share/asahi-scripts functions.sh
+	install -dD $(DESTDIR)$(PREFIX)/share/gravity-scripts
+	install -m0644 -t $(DESTDIR)$(PREFIX)/share/gravity-scripts functions.sh
 	install -dD $(DESTDIR)/$(SYS_PREFIX)/lib/firmware/vendor
 
 install-mkinitcpio: install
 	install -dD $(DESTDIR)$(PREFIX)/lib/initcpio/install
-	install -m0644 -t $(DESTDIR)$(PREFIX)/lib/initcpio/install initcpio/install/asahi
+	install -m0644 -t $(DESTDIR)$(PREFIX)/lib/initcpio/install initcpio/install/gravity
 	install -dD $(DESTDIR)$(PREFIX)/lib/initcpio/hooks
-	install -m0644 -t $(DESTDIR)$(PREFIX)/lib/initcpio/hooks initcpio/hooks/asahi
+	install -m0644 -t $(DESTDIR)$(PREFIX)/lib/initcpio/hooks initcpio/hooks/gravity
 
 install-dracut: install
 	install -dD $(DESTDIR)$(DRACUT_CONF_DIR)
-	install -m0644 -t $(DESTDIR)$(DRACUT_CONF_DIR) dracut/dracut.conf.d/10-asahi.conf
-	install -dD $(DESTDIR)$(DRACUT_MODULES_DIR)/91kernel-modules-asahi
-	install -m0755 -t $(DESTDIR)$(DRACUT_MODULES_DIR)/91kernel-modules-asahi dracut/modules.d/91kernel-modules-asahi/module-setup.sh
-	install -dD $(DESTDIR)$(DRACUT_MODULES_DIR)/99asahi-firmware
-	install -m0755 -t $(DESTDIR)$(DRACUT_MODULES_DIR)/99asahi-firmware dracut/modules.d/99asahi-firmware/install-asahi-firmware.sh
-	install -m0755 -t $(DESTDIR)$(DRACUT_MODULES_DIR)/99asahi-firmware dracut/modules.d/99asahi-firmware/load-asahi-firmware.sh
-	install -m0755 -t $(DESTDIR)$(DRACUT_MODULES_DIR)/99asahi-firmware dracut/modules.d/99asahi-firmware/module-setup.sh
+	install -m0644 -t $(DESTDIR)$(DRACUT_CONF_DIR) dracut/dracut.conf.d/10-gravity.conf
+	install -dD $(DESTDIR)$(DRACUT_MODULES_DIR)/91kernel-modules-gravity
+	install -m0755 -t $(DESTDIR)$(DRACUT_MODULES_DIR)/91kernel-modules-gravity dracut/modules.d/91kernel-modules-gravity/module-setup.sh
+	install -dD $(DESTDIR)$(DRACUT_MODULES_DIR)/99gravity-firmware
+	install -m0755 -t $(DESTDIR)$(DRACUT_MODULES_DIR)/99gravity-firmware dracut/modules.d/99gravity-firmware/install-gravity-firmware.sh
+	install -m0755 -t $(DESTDIR)$(DRACUT_MODULES_DIR)/99gravity-firmware dracut/modules.d/99gravity-firmware/load-gravity-firmware.sh
+	install -m0755 -t $(DESTDIR)$(DRACUT_MODULES_DIR)/99gravity-firmware dracut/modules.d/99gravity-firmware/module-setup.sh
 
 install-macsmc-battery: install
 	install -dD $(DESTDIR)$(SYSTEMD_UNIT_DIR)
@@ -57,12 +57,13 @@ install-macsmc-battery: install
 
 install-udev-hwdb: install
 	install -dD $(DESTDIR)$(UDEV_HWDB_DIR)
-	install -m0644 -t $(DESTDIR)$(UDEV_HWDB_DIR) udev/hwdb.d/65-autosuspend-override-asahi-sdhci.hwdb
+	install -m0644 -t $(DESTDIR)$(UDEV_HWDB_DIR) udev/hwdb.d/65-autosuspend-override-gravity-sdhci.hwdb
 
 install-arch: install install-mkinitcpio install-macsmc-battery install-udev-hwdb
 	install -m0755 -t $(DESTDIR)$(BIN_DIR)/ $(BUILD_ARCH_SCRIPTS)
 	install -dD $(DESTDIR)$(PREFIX)/lib/systemd/system
-	install -dD $(DESTDIR)$(PREFIX)/lib/systemd/system/{multi-user,sysinit}.target.wants
+	install -dD $(DESTDIR)$(PREFIX)/lib/systemd/system/multi-user.target.wants
+	install -dD $(DESTDIR)$(PREFIX)/lib/systemd/system/sysinit.target.wants
 	install -m0644 -t $(DESTDIR)$(PREFIX)/lib/systemd/system $(addprefix systemd/,$(UNITS))
 	ln -sf $(addprefix $(PREFIX)/lib/systemd/system/,$(MULTI_USER_WANTS)) \
 		$(DESTDIR)$(PREFIX)/lib/systemd/system/multi-user.target.wants/
@@ -73,14 +74,14 @@ install-fedora: install install-dracut install-macsmc-battery install-udev-hwdb
 
 uninstall:
 	rm -f $(addprefix $(DESTDIR)$(BIN_DIR)/,$(SCRIPTS))
-	rm -rf $(DESTDIR)$(PREFIX)/share/asahi-scripts
+	rm -rf $(DESTDIR)$(PREFIX)/share/gravity-scripts
 
 uninstall-mkinitcpio:
-	rm -f $(DESTDIR)$(PREFIX)/lib/initcpio/install/asahi
-	rm -f $(DESTDIR)$(PREFIX)/lib/initcpio/hooks/asahi
+	rm -f $(DESTDIR)$(PREFIX)/lib/initcpio/install/gravity
+	rm -f $(DESTDIR)$(PREFIX)/lib/initcpio/hooks/gravity
 
 uninstall-dracut:
-	rm -f $(DESTDIR)$(DRACUT_CONF_DIR)/10-asahi.conf
+	rm -f $(DESTDIR)$(DRACUT_CONF_DIR)/10-gravity.conf
 
 uninstall-macsmc-battery:
 	rm -f $(DESTDIR)$(SYSTEMD_UNIT_DIR)/macsmc-battery-charge-control-end-threshold.path
@@ -88,7 +89,7 @@ uninstall-macsmc-battery:
 	rm -f $(DESTDIR)$(UDEV_RULES_DIR)/93-macsmc-battery-charge-control.rules
 
 uninstall-udev-hwdb:
-	rm -f $(DESTDIR)$(UDEV_HWDB_DIR)/65-autosuspend-override-asahi-sdhci.hwdb
+	rm -f $(DESTDIR)$(UDEV_HWDB_DIR)/65-autosuspend-override-gravity-sdhci.hwdb
 
 uninstall-arch: uninstall-mkinitcpio uninstall-macsmc-battery uninstall-udev-hwdb
 	rm -f $(addprefix $(DESTDIR)$(BIN_DIR)/,$(ARCH_SCRIPTS))

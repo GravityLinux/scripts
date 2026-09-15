@@ -10,10 +10,10 @@ set -e
 if [ -e "$(dirname "$0")"/functions.sh ]; then
     . "$(dirname "$0")"/functions.sh
 else
-    . /usr/share/asahi-scripts/functions.sh
+    . /usr/share/gravity-scripts/functions.sh
 fi
 
-: ${SOURCE:="/usr/lib/asahi-boot/"}
+: ${SOURCE:="/usr/lib/gravity-boot/"}
 : ${M1N1:="$SOURCE/m1n1.bin"}
 : ${U_BOOT:="$SOURCE/u-boot-nodtb.bin"}
 : ${TARGET:="$1"}

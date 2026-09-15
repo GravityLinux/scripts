@@ -3,16 +3,16 @@
 
 run_earlyhook() {
     if [ -e /vendorfw ]; then
-        msg ":: Asahi: Vendor firmware was loaded by the bootloader"
+        msg ":: Gravity: Vendor firmware was loaded by the bootloader"
         return 0
     fi
 
-    if [ ! -e /proc/device-tree/chosen/asahi,efi-system-partition ]; then
-        msg ":: Asahi: Missing asahi,efi-system-partition variable, firmware will not be loaded!"
+    if [ ! -e /proc/device-tree/chosen/gravity,efi-system-partition ]; then
+        msg ":: Gravity: Missing efi-system-partition variable, firmware will not be loaded!"
         return 1
     fi
 
-    msg ":: Asahi: Triggering early load of NVMe modules..."
+    msg ":: Gravity: Triggering early load of NVMe modules..."
     modprobe apple-mailbox
     modprobe nvme-apple
     modprobe xhci-plat-hcd
@@ -27,32 +27,28 @@ run_earlyhook() {
         return 1
     fi
 
-    # If the above exists, hopefully the /dev device exists and this will work
-
-    msg ":: Asahi: Unpacking vendor firmware into initramfs..."
-
+    msg ":: Gravity: Unpacking vendor firmware into initramfs..."
     VENDORFW="/run/.system-efi/vendorfw/"
 
     (
-        . /usr/share/asahi-scripts/functions.sh
+        . /usr/share/gravity-scripts/functions.sh
         mount_sys_esp /run/.system-efi
     )
 
     if [ ! -e "$VENDORFW/firmware.cpio" ]; then
-        msg ":: Asahi: Vendor firmware not available in ESP!"
+        msg ":: Gravity: Vendor firmware not available in ESP!"
         umount /run/.system-efi
         return 1
     fi
 
     ( cd /; cpio -i < "$VENDORFW/firmware.cpio" )
     umount /run/.system-efi
-
-    msg ":: Asahi: Vendor firmware unpacked successfully"
+    msg ":: Gravity: Vendor firmware unpacked successfully"
 }
 
 run_latehook() {
     [ -e /vendorfw ] || return
-    msg ":: Asahi: Copying vendor firmware to tmpfs under root filesystem..."
+    msg ":: Gravity: Copying vendor firmware to tmpfs under root filesystem..."
     mkdir -p /new_root/lib/firmware/vendor
     mount -t tmpfs -o mode=0755 vendorfw /new_root/lib/firmware/vendor
     cp -r /vendorfw/* /vendorfw/.vendorfw.manifest /new_root/lib/firmware/vendor

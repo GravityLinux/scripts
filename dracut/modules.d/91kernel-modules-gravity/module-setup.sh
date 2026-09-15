@@ -1,4 +1,5 @@
 #!/bin/bash
+# Apple platform modules required by Gravity Linux initramfs images.
 
 # called by dracut
 installkernel() {

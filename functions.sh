@@ -19,6 +19,12 @@ warn() {
     echo "$@" 1>&2
 }
 
+get_system_esp_uuid() {
+    path="/proc/device-tree/chosen/gravity,efi-system-partition"
+    [ -r "$path" ] || return 1
+    tr -d '\000' < "$path"
+}
+
 mount_sys_esp() {
     set -e
     mountpoint="$1"
@@ -28,7 +34,7 @@ mount_sys_esp() {
         umount "$mountpoint"
     done
 
-    esp_uuid="$(cat /proc/device-tree/chosen/asahi,efi-system-partition 2>/dev/null | sed 's/\x00//')"
+    esp_uuid="$(get_system_esp_uuid 2>/dev/null || true)"
     if [ -e /boot/efi/.builder ] || [ -e /boot/.builder ] || [ -z "$esp_uuid" ]; then
         if [ -e "/boot/efi/m1n1" ]; then
             bootmnt="/boot/efi"
@@ -36,7 +42,7 @@ mount_sys_esp() {
             bootmnt="/boot"
         else
             warn "ESP not found and cannot determine ESP PARTUUID."
-            warn "Make sure that your m1n1 has the right asahi,efi-system-partition configuration,"
+            warn "Make sure that your bootloader has the right gravity,efi-system-partition configuration,"
             warn "or that your ESP is mounted at /boot/efi or /boot."
             return 1
         fi
@@ -63,12 +69,12 @@ mount_boot_esp() {
     elif [ -e "/boot/efi/boot" ]; then
         mount --bind "/boot" "$mountpoint"
     else
-        esp_uuid="$(cat /proc/device-tree/chosen/asahi,efi-system-partition | sed 's/\x00//')"
+        esp_uuid="$(get_system_esp_uuid 2>/dev/null || true)"
 
         if [ -z "$esp_uuid" ]; then
             echo "Boot ESP not found and cannot determine ESP PARTUUID."
             echo "Make sure your ESP is mounted at /boot/efi or /boot,"
-            echo "or that your m1n1 has the right asahi,efi-system-partition configuration."
+            echo "or that your bootloader has the right gravity,efi-system-partition configuration."
             return 1
         fi
 

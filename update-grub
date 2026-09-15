@@ -8,7 +8,7 @@ set -e
 if [ -e "$(dirname "$0")"/functions.sh ]; then
     . "$(dirname "$0")"/functions.sh
 else
-    . /usr/share/asahi-scripts/functions.sh
+    . /usr/share/gravity-scripts/functions.sh
 fi
 
 : ${BOOT_PART:="/boot"}

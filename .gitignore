@@ -1,6 +1,8 @@
 build
-/asahi-scripts-*\.src\.rpm
-/asahi-scripts-*\.tar\.gz
-/asahi-scripts\.spec
+/gravity-scripts-*.src.rpm
+/gravity-scripts-*.tar.gz
+/gravity-scripts.spec
+__pycache__/
+*.pyc
 /15-update-m1n1\.install
 /update-m1n1\.sysconfig

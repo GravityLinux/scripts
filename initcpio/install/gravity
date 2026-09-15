@@ -31,9 +31,8 @@ build() {
     map add_module apple-dockchannel? dockchannel-hid? apple-rtkit-helper?
 
     # Hook dependencies
-    add_full_dir /usr/share/asahi-scripts
+    add_full_dir /usr/share/gravity-scripts
 
-    # Firmware update script
     add_runscript
     add_dir /lib/firmware
     add_symlink /lib/firmware/vendor /vendorfw

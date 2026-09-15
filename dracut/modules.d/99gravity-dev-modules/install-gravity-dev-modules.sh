@@ -9,10 +9,10 @@ fi
 
 DESTDIR="/sysroot/lib/modules/$(uname -r)"
 
-info ":: Asahi: Installing dev kernel modules to root filesystem..."
+info ":: Gravity: Installing dev kernel modules to root filesystem..."
 if [ ! -e ${DESTDIR} ]; then
     if [ ! -w /sysroot ]; then
-        error ":: Asahi: root fs not writable!"
+        error ":: Gravity: root fs not writable!"
         return 0
     fi
 

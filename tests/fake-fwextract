@@ -1,0 +1,20 @@
+#!/bin/sh
+set -eu
+
+source_dir=$1
+dest_dir=$2
+shift 2
+
+[ -f "$source_dir/all_firmware.tar.gz" ]
+[ "$1" = "--machine" ]
+[ "$2" = "j773g" ]
+[ "$3" = "--open-firmware" ]
+[ "$4" = "/usr/lib/firmware" ]
+
+mkdir -p "$dest_dir"
+printf 'test archive\n' > "$dest_dir/firmware.cpio"
+printf '%s\n' "$@" > "$TEST_LOG"
+
+if [ "${TEST_FAIL:-}" = 1 ]; then
+    exit 7
+fi

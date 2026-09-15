@@ -15,7 +15,7 @@ dt() {
 
 banner() {
     cat <<EOF
-# Asahi Linux System Diagnostic Dump
+# Gravity Linux System Diagnostic Dump
 
     Collected at:   $(date) ($(date -Iseconds))
     Username:       $(whoami)
@@ -49,7 +49,7 @@ EOF
 boot_config() {
     cat <<EOF
 ## Boot information
-    ESP UUID:       $(dt chosen/asahi,efi-system-partition)
+    ESP UUID:       $(dt chosen/gravity,efi-system-partition)
     EFI:            $([ -e /sys/firmware/efi ] &&
                        echo available || echo unavailable)
 
@@ -148,15 +148,15 @@ package_versions() {
     echo "## Package versions"
     if [ -e /etc/arch-release ]; then
       cmd="pacman -Q"
-      pkgs="m1n1 uboot-asahi asahi-scripts asahi-meta asahi-desktop-meta
-            asahi-fwextract asahi-configs alsa-ucm-conf-asahi
-            asahilinux-keyring linux linux-asahi linux-asahi-edge
+      pkgs="m1n1 uboot-gravity gravity-scripts gravity-meta gravity-desktop-meta
+            gravity-fwextract gravity-configs alsa-ucm-conf-asahi
+            gravitylinux-keyring linux linux-gravity linux-gravity-edge
             mesa xorg-server pipewire kwin mutter"
     elif [ -e /etc/fedora-release ]; then
       cmd="rpm -q"
-      pkgs="m1n1 alsa-ucm-asahi asahi-platform-metapackage asahi-repos
-            fedora-asahi-remix-scripts tiny-dfr uboot-images-armv8 kernel-16k
-            kernel-16k-modules-extra asahi-fwextract dracut-asahi update-m1n1
+      pkgs="m1n1 alsa-ucm-asahi gravity-platform-metapackage gravity-repos
+            gravity-remix-scripts tiny-dfr uboot-images-armv8 kernel-16k
+            kernel-16k-modules-extra gravity-fwupdate python3-gravity_firmware dracut-gravity update-m1n1
             asahi-audio speakersafetyd wireplumber pipewire mesa"
     else
       echo "Distribution not supported"
@@ -172,7 +172,7 @@ EOF
 
 module_parameters() {
     echo "## Module parameters"
-    for mod in asahi hid_apple hid_magicmouse; do
+    for mod in asahi asahi_m4 hid_apple hid_magicmouse; do
         [ ! -e /sys/module/$mod/parameters/ ] && continue
         echo "    $mod"
         for param in /sys/module/$mod/parameters/*; do
@@ -278,7 +278,7 @@ diagnose() {
             echo
             echo "** WARNING! **"
             echo "You are using an unsupported firmware version ($ver) on this platform ($plat)."
-            echo "This means you explicitly chose expert mode when installing Asahi Linux,"
+            echo "This means you explicitly chose expert mode when installing Gravity Linux,"
             echo "and then explicitly selected a non-default unsupported version."
             echo "You are on your own. Please do not file bugs. We can't help you."
             echo "Reinstall without using expert mode if you want support."
@@ -304,10 +304,10 @@ diagnose() {
             echo "for how to fix."
         fi
 
-        if ! rpm -q asahi-platform-metapackage > /dev/null 2>&1; then
+        if ! rpm -q gravity-platform-metapackage > /dev/null 2>&1; then
             echo
             echo "** WARNING! **"
-            echo "The asahi-platform-metapackage package is not installed, you may be missing"
+            echo "The gravity-platform-metapackage package is not installed, you may be missing"
             echo "required platform dependencies. See https://discussion.fedoraproject.org/t/95301"
             echo "for how to fix it."
         fi
@@ -315,7 +315,7 @@ diagnose() {
 }
 
 if [ -z "$1" ]; then
-    diagnose "$HOME/asahi-diagnose-$(date +%Y%m%d-%H%M%S).txt"
+    diagnose "$HOME/gravity-diagnose-$(date +%Y%m%d-%H%M%S).txt"
 elif [ "$1" = "-" ]; then
     diagnose /dev/stdout
 else

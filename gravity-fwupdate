@@ -1,0 +1,78 @@
+#!/bin/sh
+# SPDX-License-Identifier: MIT
+
+set -eu
+
+unset PYTHON
+
+[ -e /etc/default/gravity-fwupdate ] && . /etc/default/gravity-fwupdate
+
+: "${GRAVITYFW:=}"
+: "${VENDORFW:=}"
+: "${VENDORFWTMP:=/run/.vendorfw-tmp}"
+: "${PYTHON:=/usr/bin/python3}"
+: "${FWEXTRACT:=gravity-fwextract}"
+: "${GRAVITY_MACHINE:=}"
+
+if [ -e "$(dirname "$0")"/functions.sh ]; then
+    . "$(dirname "$0")"/functions.sh
+else
+    . /usr/share/gravity-scripts/functions.sh
+fi
+
+umount=false
+
+cleanup() {
+    status=$?
+    rm -rf "$VENDORFWTMP" "$VENDORFW.new"
+    if "$umount"; then
+        umount /run/.system-efi || true
+    fi
+    return "$status"
+}
+trap cleanup EXIT
+trap 'exit 1' HUP INT TERM
+
+if [ -z "$GRAVITYFW" ] && [ -z "$VENDORFW" ]; then
+    mount_sys_esp /run/.system-efi
+    GRAVITYFW="/run/.system-efi/gravity/"
+    VENDORFW="/run/.system-efi/vendorfw"
+    umount=true
+fi
+
+if [ ! -e "${GRAVITYFW}/all_firmware.tar.gz" ]; then
+    echo "No firmware tarball found, skipping extraction"
+    exit 0
+fi
+
+if [ -z "$GRAVITY_MACHINE" ] && [ -r /proc/device-tree/compatible ]; then
+    if tr '\0' '\n' < /proc/device-tree/compatible | grep -qx 'apple,j773g'; then
+        GRAVITY_MACHINE=j773g
+    fi
+fi
+
+if [ -z "$GRAVITY_MACHINE" ]; then
+    echo "Unable to select a Gravity firmware machine profile" >&2
+    exit 1
+fi
+
+rm -rf "$VENDORFWTMP" "$VENDORFW.new"
+mkdir -p "$VENDORFWTMP"
+
+echo "Upgrading vendor firmware package"
+"$FWEXTRACT" "$GRAVITYFW" "$VENDORFWTMP" \
+    --machine "$GRAVITY_MACHINE" --open-firmware /usr/lib/firmware
+mv "${VENDORFWTMP}" "$VENDORFW".new
+if [ -e "$VENDORFW" ]; then
+    rm -rf "$VENDORFW.old"
+    mv "$VENDORFW" "$VENDORFW.old"
+fi
+if mv "$VENDORFW.new" "$VENDORFW"; then
+    rm -rf "$VENDORFW.old"
+else
+    [ ! -e "$VENDORFW.old" ] || mv "$VENDORFW.old" "$VENDORFW"
+    exit 1
+fi
+echo "Firmware upgraded"
+
+true

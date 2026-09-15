@@ -1,0 +1,3 @@
+# Gravity Linux Apple SDHCI power-management defaults.
+pci:v000017A0d00009755*
+ ID_AUTOSUSPEND=0
