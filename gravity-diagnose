@@ -154,7 +154,7 @@ package_versions() {
             mesa xorg-server pipewire kwin mutter"
     elif [ -e /etc/fedora-release ]; then
       cmd="rpm -q"
-      pkgs="m1n1 alsa-ucm-asahi gravity-platform-metapackage gravity-repos
+      pkgs="bootloader alsa-ucm-asahi gravity-platform-metapackage gravity-repos
             gravity-remix-scripts tiny-dfr uboot-images-armv8 kernel-16k
             kernel-16k-modules-extra gravity-fwupdate python3-gravity_firmware dracut-gravity update-m1n1
             asahi-audio speakersafetyd wireplumber pipewire mesa"
