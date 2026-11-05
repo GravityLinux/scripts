@@ -1,5 +1,20 @@
 # SPDX-License-Identifier: MIT
 
+# The extractor owns the supported-board list. Read the product number from
+# the device tree so adding a firmware profile does not also require a shell edit.
+get_firmware_machine() {
+    compatible=${1:-/proc/device-tree/compatible}
+    [ -r "$compatible" ] || return 1
+    machine=$(tr '\0' '\n' < "$compatible" |
+        sed -n 's/^apple,\(j[0-9][0-9]*[a-z]*\)$/\1/p')
+    [ -n "$machine" ] || return 1
+    case "$machine" in
+        *'
+'*) return 1 ;; # Ambiguous product numbers must not select a wrong profile.
+    esac
+    printf '%s\n' "$machine"
+}
+
 # NOTE: These functions are used in the initramfs, so they must be ash/busybox compatible!
 
 info() {

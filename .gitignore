@@ -1,4 +1,6 @@
 build
+dist/
+*.egg-info/
 /gravity-scripts-*.src.rpm
 /gravity-scripts-*.tar.gz
 /gravity-scripts.spec

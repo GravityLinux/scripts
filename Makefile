@@ -13,6 +13,11 @@ UDEV_RULES_DIR=$(PREFIX)/lib/udev/rules.d
 UDEV_HWDB_DIR=$(PREFIX)/lib/udev/hwdb.d
 BUILD_SCRIPTS=$(addprefix build/,$(SCRIPTS))
 BUILD_ARCH_SCRIPTS=$(addprefix build/,$(ARCH_SCRIPTS))
+PYTHON ?= python3
+INSTALL_FIRMWARE ?= 1
+FIRMWARE_BIN_DIR ?= $(PREFIX)/bin
+PYTHON_SITE_PACKAGES ?= $(shell $(PYTHON) -c 'import sysconfig; print(sysconfig.get_path("purelib", vars={"base": "$(PREFIX)", "platbase": "$(PREFIX)"}))')
+FIRMWARE_MODULES=$(wildcard gravity_firmware/*.py gravity_firmware/profiles/*.py)
 
 all: $(BUILD_SCRIPTS) $(BUILD_ARCH_SCRIPTS)
 
@@ -23,6 +28,28 @@ build/%: %
 
 clean:
 	rm -rf build
+
+check:
+	sh tests/test-fwupdate.sh
+	$(PYTHON) -m unittest discover -s tests -v
+
+ifeq ($(INSTALL_FIRMWARE),1)
+install: install-firmware
+uninstall: uninstall-firmware
+endif
+
+# RPM builds use the Python wheel instead and set INSTALL_FIRMWARE=0 below.
+install-firmware:
+	install -d "$(DESTDIR)$(FIRMWARE_BIN_DIR)"
+	install -m0755 gravity-fwextract "$(DESTDIR)$(FIRMWARE_BIN_DIR)/gravity-fwextract"
+	@for module in $(FIRMWARE_MODULES); do \
+		install -d "$(DESTDIR)$(PYTHON_SITE_PACKAGES)/$$(dirname "$$module")"; \
+		install -m0644 "$$module" "$(DESTDIR)$(PYTHON_SITE_PACKAGES)/$$module" || exit; \
+	done
+
+uninstall-firmware:
+	rm -f "$(DESTDIR)$(FIRMWARE_BIN_DIR)/gravity-fwextract"
+	rm -rf "$(DESTDIR)$(PYTHON_SITE_PACKAGES)/gravity_firmware"
 
 install: all
 	install -d $(DESTDIR)$(BIN_DIR)/
@@ -100,6 +127,9 @@ uninstall-arch: uninstall-mkinitcpio uninstall-macsmc-battery uninstall-udev-hwd
 uninstall-fedora: uninstall-dracut uninstall-macsmc-battery uninstall-udev-hwdb
 
 .PHONY: clean \
+        check \
+        install-firmware \
+        uninstall-firmware \
         install \
         install-mkinitcpio \
         install-dracut \

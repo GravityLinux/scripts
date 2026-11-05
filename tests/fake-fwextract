@@ -7,7 +7,7 @@ shift 2
 
 [ -f "$source_dir/all_firmware.tar.gz" ]
 [ "$1" = "--machine" ]
-[ "$2" = "j773g" ]
+[ "$2" = "${TEST_MACHINE:-j773g}" ]
 [ "$3" = "--open-firmware" ]
 [ "$4" = "/usr/lib/firmware" ]
 

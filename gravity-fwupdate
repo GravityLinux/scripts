@@ -45,10 +45,8 @@ if [ ! -e "${GRAVITYFW}/all_firmware.tar.gz" ]; then
     exit 0
 fi
 
-if [ -z "$GRAVITY_MACHINE" ] && [ -r /proc/device-tree/compatible ]; then
-    if tr '\0' '\n' < /proc/device-tree/compatible | grep -qx 'apple,j773g'; then
-        GRAVITY_MACHINE=j773g
-    fi
+if [ -z "$GRAVITY_MACHINE" ]; then
+    GRAVITY_MACHINE=$(get_firmware_machine) || GRAVITY_MACHINE=
 fi
 
 if [ -z "$GRAVITY_MACHINE" ]; then

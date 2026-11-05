@@ -1,0 +1,12 @@
+include Makefile LICENSE README.md
+include gravity-fwextract gravity-fwupdate gravity-diagnose functions.sh
+include update-m1n1 update-grub first-boot
+graft docs
+graft tests
+graft dracut
+graft initcpio
+graft libalpm
+graft macsmc-battery
+graft systemd
+graft udev
+global-exclude __pycache__ *.py[cod]
